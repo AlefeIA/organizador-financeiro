@@ -1,107 +1,75 @@
 import streamlit as st
-import matplotlib.pyplot as plt
 
+# Configuração da página
 st.set_page_config(page_title="Organizador Financeiro", layout="centered")
 
-# 🌗 Escolha de tema
-tema = st.selectbox("🌗 Escolha o tema visual:", ["Claro", "Escuro"])
-if tema == "Escuro":
-    st.markdown("""
-        <style>
-            body { background-color: #0e1117; color: white; }
-            .stApp { background-color: #0e1117; color: white; }
-        </style>
-    """, unsafe_allow_html=True)
+# Inicializa o controle de páginas
+if "pagina" not in st.session_state:
+    st.session_state.pagina = 1
 
-# Título
-st.title("💰 Organizador Financeiro Inteligente")
-st.markdown("Organize sua vida financeira por categoria e entenda para onde vai seu dinheiro.")
+# Função para mudar de página
+def avancar():
+    st.session_state.pagina += 1
 
-# RECEITA
-st.header("💵 Receita")
-salario = st.number_input("Salário principal (R$):", min_value=0.0, format="%.2f")
-renda_extra = st.number_input("Outra fonte de renda (R$):", min_value=0.0, format="%.2f")
-renda_total = salario + renda_extra
+# PÁGINA 1 – Boas-vindas
+if st.session_state.pagina == 1:
+    st.title("👋 Seja bem-vindo ao Organizador Financeiro guiado por IA")
+    st.markdown("### Preparado para ver seu dinheiro render?")
+    st.image("https://cdn-icons-png.flaticon.com/512/609/609803.png", width=100)
+    if st.button("Sim, vamos começar!"):
+        avancar()
 
-# GASTOS
-st.header("📂 Gastos por categoria:")
+# PÁGINA 2 – Perfil
+elif st.session_state.pagina == 2:
+    st.title("📋 Etapa 1: Seu Perfil")
 
-# Moradia
-st.subheader("🏠 Moradia")
-aluguel = st.number_input("— Aluguel:", min_value=0.0, format="%.2f")
-luz = st.number_input("— Luz:", min_value=0.0, format="%.2f")
-agua = st.number_input("— Água:", min_value=0.0, format="%.2f")
-moradia = aluguel + luz + agua
-st.markdown(f"**Total Moradia:** R$ {moradia:.2f}")
+    sexo = st.radio("Sexo:", ["Masculino", "Feminino", "Outro"])
+    estado_civil = st.selectbox("Estado Civil:", ["Solteiro(a)", "Casado(a)", "Divorciado(a)", "Viúvo(a)"])
+    tem_filhos = st.radio("Você tem filhos?", ["Não", "Sim"])
 
-# Transporte
-st.subheader("🚗 Transporte")
-financiamento = st.number_input("— Financiamento de veículo:", min_value=0.0, format="%.2f")
-locomocao = st.number_input("— Custo de locomoção:", min_value=0.0, format="%.2f")
-manutencao = st.number_input("— Manutenção do veículo:", min_value=0.0, format="%.2f")
-transporte_terc = st.number_input("— Transporte terceirizado:", min_value=0.0, format="%.2f")
-transporte = financiamento + locomocao + manutencao + transporte_terc
-st.markdown(f"**Total Transporte:** R$ {transporte:.2f}")
+    num_filhos = 0
+    if tem_filhos == "Sim":
+        num_filhos = st.number_input("Quantos filhos?", min_value=1, step=1)
 
-# Alimentação
-st.subheader("🍽️ Alimentação")
-mercado = st.number_input("— Mercado:", min_value=0.0, format="%.2f")
-delivery = st.number_input("— Delivery:", min_value=0.0, format="%.2f")
-restaurantes = st.number_input("— Restaurantes e lanchonetes:", min_value=0.0, format="%.2f")
-alimentacao = mercado + delivery + restaurantes
-st.markdown(f"**Total Alimentação:** R$ {alimentacao:.2f}")
+    if st.button("Avançar para o organizador"):
+        # Armazenar no session_state se quiser usar depois
+        st.session_state.perfil = {
+            "sexo": sexo,
+            "estado_civil": estado_civil,
+            "tem_filhos": tem_filhos,
+            "num_filhos": num_filhos
+        }
+        avancar()
 
-# Saúde
-st.subheader("🩺 Saúde")
-saude = st.number_input("Total com saúde (R$):", min_value=0.0, format="%.2f")
+# PÁGINA 3 – Organizador financeiro (versão básica)
+elif st.session_state.pagina == 3:
+    st.title("💰 Etapa 2: Organize suas Finanças")
 
-# Lazer
-st.subheader("🎉 Lazer")
-opcoes_lazer = st.multiselect(
-    "Quais são seus 3 principais tipos de lazer?",
-    ["Cinema", "Viagens", "Streaming", "Jogos", "Bares/Restaurantes", "Academia", "Shows", "Outros"],
-    max_selections=3
-)
+    salario = st.number_input("Salário principal (R$):", min_value=0.0, format="%.2f")
+    renda_extra = st.number_input("Outra fonte de renda (R$):", min_value=0.0, format="%.2f")
+    renda_total = salario + renda_extra
 
-valores_lazer = {}
-total_lazer = 0
-for opcao in opcoes_lazer:
-    valor = st.number_input(f"— {opcao}:", min_value=0.0, format="%.2f")
-    valores_lazer[opcao] = valor
-    total_lazer += valor
-lazer = total_lazer
-st.markdown(f"**Total Lazer:** R$ {lazer:.2f}")
+    st.subheader("📂 Gastos Mensais")
+    moradia = st.number_input("Moradia (aluguel, luz, água):", min_value=0.0, format="%.2f")
+    transporte = st.number_input("Transporte (combustível, ônibus, etc):", min_value=0.0, format="%.2f")
+    alimentacao = st.number_input("Alimentação:", min_value=0.0, format="%.2f")
+    saude = st.number_input("Saúde:", min_value=0.0, format="%.2f")
+    lazer = st.number_input("Lazer:", min_value=0.0, format="%.2f")
+    outros = st.number_input("Outros:", min_value=0.0, format="%.2f")
 
-# Outros
-st.subheader("📦 Outros")
-outros = st.number_input("Outros gastos (R$):", min_value=0.0, format="%.2f")
+    total_gastos = moradia + transporte + alimentacao + saude + lazer + outros
+    sobra = renda_total - total_gastos
 
-# Resultado Final
-total_gastos = moradia + transporte + alimentacao + saude + lazer + outros
-economia = renda_total - total_gastos
+    st.subheader("📊 Resultado")
+    st.write(f"**Total de Renda:** R$ {renda_total:.2f}")
+    st.write(f"**Total de Gastos:** R$ {total_gastos:.2f}")
+    st.write(f"**Sobra do mês:** R$ {sobra:.2f}")
 
-st.subheader("📊 Resultado Mensal")
-st.write(f"**Total de gastos:** R$ {total_gastos:.2f}")
-st.write(f"**Sobra do mês:** R$ {economia:.2f}")
+    if sobra < 0:
+        st.error("⚠️ Você está gastando mais do que ganha.")
+    elif sobra == 0:
+        st.warning("⚠️ Sua renda está totalmente comprometida.")
+    else:
+        st.success("✅ Parabéns! Você está economizando.")
 
-if economia < 0:
-    st.error("⚠️ Você está gastando mais do que ganha!")
-elif economia == 0:
-    st.warning("⚠️ Você está no limite do orçamento.")
-else:
-    st.success("✅ Você está economizando! Continue assim.")
-
-# Gráfico
-labels = ['Moradia', 'Transporte', 'Alimentação', 'Saúde', 'Lazer', 'Outros']
-valores = [moradia, transporte, alimentacao, saude, lazer, outros]
-labels_filtradas = [label for label, valor in zip(labels, valores) if valor > 0]
-valores_filtrados = [valor for valor in valores if valor > 0]
-
-if valores_filtrados:
-    st.subheader("📉 Distribuição dos gastos:")
-    fig, ax = plt.subplots()
-    ax.pie(valores_filtrados, labels=labels_filtradas, autopct='%1.1f%%', startangle=90)
-    ax.axis('equal')
-    st.pyplot(fig)
-
-
+    st.markdown("🔁 Você pode voltar e revisar seus dados a qualquer momento recarregando a página.")
