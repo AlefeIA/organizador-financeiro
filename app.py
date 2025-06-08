@@ -3,9 +3,16 @@ import streamlit as st
 import json
 import os
 
+# === Função para salvar múltiplos campos ===
+def salvar_dados(pares):
+    if isinstance(pares, list):
+        for i in range(0, len(pares), 2):
+            dados[pares[i]] = pares[i + 1]
+    usuarios[st.session_state.email]["dados"] = dados
+    salvar_usuarios(usuarios)
+
 st.set_page_config(page_title="Organizador IA", layout="wide")
 
-# === TEMA CLARO/ESCURO (via sessão) ===
 if "tema_escuro" not in st.session_state:
     st.session_state.tema_escuro = False
 
@@ -14,7 +21,6 @@ def toggle_tema():
 
 tema_classe = "background-color:#1c1c1c;color:white;border-radius:10px;padding:20px;" if st.session_state.tema_escuro else "background-color:#f9f9f9;color:#222;border-radius:10px;padding:20px;"
 
-# === ARQUIVO DE USUÁRIOS ===
 def carregar_usuarios():
     if os.path.exists("usuarios.json"):
         with open("usuarios.json", "r") as file:
@@ -27,12 +33,10 @@ def salvar_usuarios(usuarios):
 
 usuarios = carregar_usuarios()
 
-# === ESTADO DE LOGIN ===
 for key in ["logado", "email", "pagina"]:
     if key not in st.session_state:
         st.session_state[key] = False if key == "logado" else "" if key == "email" else 1
 
-# === LOGIN OU CADASTRO ===
 if not st.session_state.logado:
     st.title("🔐 Login ou Cadastro")
     aba = st.radio("Escolha:", ["Login", "Cadastrar"])
@@ -56,13 +60,13 @@ if not st.session_state.logado:
             else:
                 st.error("E-mail ou senha incorretos.")
 
-# === APP PRINCIPAL ===
 if st.session_state.logado:
-    if "boas_vindas_vista" not in st.session_state:
-        st.session_state.boas_vindas_vista = False
     email = st.session_state.email
     dados = usuarios[email].get("dados", {})
     pagina = st.session_state.pagina
+
+    if "boas_vindas_vista" not in st.session_state:
+        st.session_state.boas_vindas_vista = False
 
     st.sidebar.title("⚙️ Menu")
     st.sidebar.write(f"Usuário: {email}")
@@ -75,7 +79,6 @@ if st.session_state.logado:
         if st.button("Começar"):
             st.session_state.boas_vindas_vista = True
             st.rerun()
-        st.markdown(f"<div style='{tema_classe}'><h2>👋 Seja bem-vindo ao Organizador Financeiro IA</h2><p>Preparado para ver seu dinheiro render?</p></div>", unsafe_allow_html=True)
 
     if menu == "Perfil":
         st.markdown(f"<div style='{tema_classe}'><h3>📋 Perfil do Usuário</h3>", unsafe_allow_html=True)
@@ -122,10 +125,12 @@ if st.session_state.logado:
 
         with st.expander("🎉 Lazer"):
             opcoes = st.multiselect("Escolha até 3 programas de lazer:", ["Cinema", "Bares", "Jogos", "Viagens", "Streaming"])
+            pares_lazer = []
             for i, opcao in enumerate(opcoes[:3]):
                 valor = st.number_input(f"{opcao}:", value=dados.get(opcao, 0.0), format="%.2f")
                 dados[opcao] = valor
-            st.button("💾 Salvar Lazer", key="lazer_btn", on_click=lambda: salvar_dados(opcoes))
+                pares_lazer.extend([opcao, valor])
+            st.button("💾 Salvar Lazer", key="lazer_btn", on_click=lambda: salvar_dados(pares_lazer))
 
         saude = st.number_input("🩺 Saúde:", value=dados.get("saude", 0.0), format="%.2f")
         outros = st.number_input("📦 Outros gastos:", value=dados.get("outros", 0.0), format="%.2f")
@@ -176,11 +181,3 @@ if st.session_state.logado:
             else:
                 st.success(f"✅ {cat} dentro do limite ideal.")
         st.markdown("</div>", unsafe_allow_html=True)
-
-# === Função para salvar múltiplos campos ===
-def salvar_dados(pares):
-    if isinstance(pares, list):
-        for i in range(0, len(pares), 2):
-            dados[pares[i]] = pares[i + 1]
-    usuarios[st.session_state.email]["dados"] = dados
-    salvar_usuarios(usuarios)

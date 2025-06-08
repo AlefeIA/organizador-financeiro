@@ -4,8 +4,24 @@
         "dados": {
             "sexo": "Masculino",
             "estado_civil": "Solteiro(a)",
-            "tem_filhos": "N\u00e3o",
-            "num_filhos": 0
+            "tem_filhos": "Sim",
+            "num_filhos": 1,
+            "aluguel": 1300.0,
+            "luz": 150.0,
+            "agua": 150.0,
+            "financiamento": 960.0,
+            "locomocao": 500.0,
+            "manutencao": 130.0,
+            "transporte_publico": 0.0,
+            "mercado": 1000.0,
+            "delivery": 100.0,
+            "restaurantes": 100.0,
+            "Cinema": 100.0,
+            "Bares": 100.0,
+            "Jogos": 100.0,
+            "salario": 8000.0,
+            "saude": 100.0,
+            "outros": 100.0
         }
     }
 }
